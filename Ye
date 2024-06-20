@@ -1,0 +1,152 @@
+local Players = game.Players
+local plr = Players.LocalPlayer
+local isEnabled = false
+local loop = false
+local retry = true
+_G.name = "sword"
+_G.enemOnly = true
+local reach = 21
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wizard"))()
+local PhantomForcesWindow = Library:NewWindow("Combat")
+local gg = PhantomForcesWindow:NewSection("Kill Options")
+
+function findTool(String)
+    local strl = String:lower()
+    for i,v in pairs(plr.Backpack:GetChildren()) do
+        if v.Name:lower():match(strl) ~= nil then
+            return v
+        end
+    end
+    for i,v in pairs(plr.Character:GetChildren()) do
+        if v.Name:lower():match(strl) ~= nil then
+            return v
+        end
+    end
+end
+
+function getTool()
+    return findTool(_G.name)
+end
+
+function KillAura()
+    while isEnabled do
+        if _G.enemOnly then
+            for _, v in pairs(game.Players:GetPlayers()) do
+                pcall(function()
+                    if v ~= plr and v.TeamColor.Name ~= plr.TeamColor.Name and v.Character.Humanoid.Health ~= 0 and not v.Character:FindFirstChildOfClass("ForceField") then
+                        local Distance = (v.Character:FindFirstChildOfClass("Part").Position - plr.Character:FindFirstChildOfClass("Part").Position).magnitude
+                        if Distance <= reach then
+                            for i = 1, 25 do
+                                plr.Character.Humanoid.RootPart.CFrame = v.Character.Humanoid.RootPart.CFrame * CFrame.new(-1.6, 0, 1.8)
+                                local h = getTool()
+                                h.Parent = plr.Character
+                                h:Activate()
+                                if plr.Character:FindFirstChildOfClass("Tool").Name ~= getTool().Name then
+                                    plr.Character:FindFirstChildOfClass("Humanoid"):UnequipTools()
+                                end
+                                if v.Character.Humanoid.Health <= 0 then
+                                    loop = false
+                                    if retry == true then
+                                        wait(1)
+                                        KillAura()
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        else
+            for _, v in pairs(game.Players:GetPlayers()) do
+                pcall(function()
+                    if v ~= plr and v.Character.Humanoid.Health ~= 0 and not v.Character:FindFirstChildOfClass("ForceField") then
+                        local Distance = (v.Character:FindFirstChildOfClass("Part").Position - plr.Character:FindFirstChildOfClass("Part").Position).magnitude
+                        if Distance <= reach then
+                            for i = 1, 25 do
+                                plr.Character.Humanoid.RootPart.CFrame = v.Character.Humanoid.RootPart.CFrame * CFrame.new(-1.6, 0, 1.8)
+                                local h = getTool()
+                                h.Parent = plr.Character
+                                h:Activate()
+                                if plr.Character:FindFirstChildOfClass("Tool").Name ~= getTool().Name then
+                                    plr.Character:FindFirstChildOfClass("Humanoid"):UnequipTools()
+                                end
+                                if v.Character.Humanoid.Health <= 0 then
+                                    loop = false
+                                    if retry == true then
+                                        wait(1)
+                                        KillAura()
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+        game:GetService("RunService").Heartbeat:Wait()
+    end
+end
+
+local function notify(Title, Text, Duration)
+    Title = Title or "Title"
+    Text = Text or "Text"
+    Duration = Duration or 5
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = Title,
+        Text = Text,
+        Duration = Duration,
+    })
+end
+
+gg:CreateToggle("Kill Aura", function(value)
+    isEnabled = value
+    if isEnabled then
+        loop = true
+        retry = true
+        KillAura()
+    else
+        loop = false
+        retry = false
+    end
+end)
+
+gg:CreateTextbox("Reach - 10", function(text)
+    if focusLost then
+        if not tonumber(text) then
+            reach = tostring(10 or 10 and tonumber(string.format("%.2f", 10)))
+            notify(reach, "nope string is wrong current reach is 10")
+        elseif tonumber(text) <= 10 then
+            reach = 10
+            notify("minimum", "the minimum reach is 10, current reach: " .. reach)
+        elseif tonumber(text) >= 40 then
+            reach = 40
+            notify("maximum", "the maximum reach is 40, current reach: " .. reach)
+        else
+            reach = tonumber(text)
+        end
+    end
+end)
+
+gg:CreateDropdown("Mode", {"enemies only", "other"}, 2, function(d)
+    if d == "enemies only" then
+        _G.enemOnly = true
+    elseif d == "others" then
+        _G.enemOnly = false
+    end
+end)
+
+local plr = Library:NewWindow("real")
+local pl = plr:NewSection("Tp seygma")
+
+pl:CreateButton("Tp To Blue Flag", function()
+local plr = game.Players.LocalPlayer
+local targetCFrame = game:GetService("Workspace").Map.Blue.FlagPodium.CFrame
+plr.Character.HumanoidRootPart.CFrame = targetCFrame
+end)
+
+pl:CreateButton("Tp To Red Flag", function()
+local plr = game.Players.LocalPlayer
+local targetCFrame = game:GetService("Workspace").Map.Red.FlagPodium.CFrame
+plr.Character.HumanoidRootPart.CFrame = targetCFrame
+end)
